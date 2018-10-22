@@ -1,8 +1,12 @@
 $(function() {
-    let games = ["Mario", "Zelda", "Call Of Duty", "FIFA", "Fallout", "Sims"]
-    let limit = 10
-    let rating = "PG"
-    let offset = 0
+    let games = ["Mario", "Zelda", "Call Of Duty", "FIFA", "Fallout", "Sims"];
+    let limit = 10;
+    let rating = "PG";
+    let offset = 0;
+    let times = 0;
+    let currentData;
+
+    renderButtons()
 
     //render buttons
     function renderButtons() {
@@ -12,6 +16,7 @@ $(function() {
             button.text(element)
             $(".btn-container").append(button);
         })
+        addClickHandler()
     }
 
     //push input
@@ -24,8 +29,42 @@ $(function() {
         }
     }
 
+    //single gif data
+    function createGif(el) {
+        let gifDiv = $("<div class='gif-container'>")
+        let gifImg = $("<img src='" + el.images.fixed_height_still.url + "' class='gifImage'>")
+        gifImg.attr("status", "still")
+        gifImg.attr("still-data", el.images.fixed_height_still.url)
+        gifImg.attr("animated-data", el.images.fixed_height.url)
+        let gifRating = $("<p class='gifRating'>")
+        gifRating.html("Rating: " + el.rating)
+        let gifTitle = $("<p class='gifTitle'>")
+        gifTitle.html("Title: " + el.title)
+        let download = $("<a href='" + el.images.fixed_height.url + "' download>")
+        let downloadBtn = $("<button class='gameBtn'>")
+        downloadBtn.text("Download Now")
+        download.append(downloadBtn)
+        gifDiv.append(gifImg).append(gifRating).append(gifTitle).append(download)
+        return gifDiv
+    }
+
+    //still or animated
+    function changeStatus() {
+        $(".gifImage").on("click", function() {
+            if ($(this).attr("status") === "still") {
+                $(this).attr("status", "animated");
+				$(this).attr("src", $(this).attr("animated-data"));
+            } else {
+                $(this).attr("status", "still");
+				$(this).attr("src", $(this).attr("still-data"));
+            }
+        })
+    }
+
     //get data
     function getAPI(selectedGame) {
+
+        offset += 10 * times
 
         let queryURL =  "https://api.giphy.com/v1/gifs/search?api_key=ZW3MGvr8tjASErfr3PEVyXPF93WiQx2B&q=https://api.giphy.com/v1/gifs/search?api_key=ZW3MGvr8tjASErfr3PEVyXPF93WiQx2B&q=" + selectedGame + "&limit=" + limit + "&offset=" + offset + "&rating=" + rating + "&lang=en"
 
@@ -33,16 +72,41 @@ $(function() {
             url: queryURL,
             method: "GET"
         }).then(function(response) {
-            console.log(response.data)
+            let result = response.data
+            result.forEach(function(element) {
+                let newGifDiv = createGif(element)
+                $("#populates").append(newGifDiv)
+            })
+            changeStatus()
+            
         })
     }
 
     //show data
-    $(".gameBtn").on("click",function() {
-        $("#populates").empty()
-        let data = $(this).text()
-        getAPI(data)
-    })
+    function addClickHandler() {
+        $(".gameBtn").on("click",function() {
+            $("#populates").empty()
+            $(".moreGif").empty()
+            limit = 10
+            times = 0
+            let data = $(this).text()
+            currentData = $(this).text()
+            getAPI(data)
+            showMoreBtn()
+            showMoreGifs()
+        })
+    }
+
+    //show more gifs
+    function showMoreGifs() {
+        $(".moreGifBtn").on("click", function() {
+            $(".moreGif").empty()
+            times++
+            getAPI(currentData)
+            showMoreBtn()
+            showMoreGifs()
+        })
+    }
 
     //submit
     $("#submit").on("click", function() {
@@ -51,6 +115,13 @@ $(function() {
         pushInput(userInput)
     })
 
-    renderButtons()
+    //add more gifs
+    function showMoreBtn() {
+        let showMoreGif = $("<button class='moreGifBtn'>")
+        showMoreGif.text("Show More")
+        $(".moreGif").append(showMoreGif)
+    }
+
+    
 
 })
