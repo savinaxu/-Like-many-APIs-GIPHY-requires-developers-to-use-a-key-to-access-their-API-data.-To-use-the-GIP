@@ -25,9 +25,11 @@ $(function() {
         $(".favourite").empty()
         if(localStorage) {
             let favImages = JSON.parse(localStorage.getItem("favImages"))
-            if (!favImages) return
+            if (!favImages) {
+                return
+            }
             Object.keys(favImages).forEach(function(key) {
-                let newGifDiv = createGif(favImages[key])
+                let newGifDiv = createGif(favImages[key], "Remove", removeFromFav)
                 $(".favourite").append(newGifDiv)
             });
         } else {
@@ -46,7 +48,7 @@ $(function() {
     }
 
     //single gif data
-    function createGif(el) {
+    function createGif(el, favText, favCallback) {
         let gifDiv = $("<div class='gif-container'>")
         let gifImg = $("<img src='" + el.images.fixed_height_still.url + "' class='gifImage'>")
         gifImg.attr("status", "still")
@@ -60,9 +62,9 @@ $(function() {
         let downloadBtn = $("<button class='downBtn'>")
         downloadBtn.text("Download Now")
         let favouriteBtn = $("<button class='favBtn'>")
-        favouriteBtn.text("Add to Favourite")
+        favouriteBtn.text(favText)
         favouriteBtn.click(function() {
-            addToFav(el)
+            favCallback(el)
         })
         download.append(downloadBtn)
         gifDiv.append(gifImg).append(gifRating).append(gifTitle).append(download).append(favouriteBtn)
@@ -87,7 +89,7 @@ $(function() {
 
         offset += 10 * times
 
-        let queryURL =  "https://api.giphy.com/v1/gifs/search?api_key=ZW3MGvr8tjASErfr3PEVyXPF93WiQx2B&q=https://api.giphy.com/v1/gifs/search?api_key=ZW3MGvr8tjASErfr3PEVyXPF93WiQx2B&q=" + selectedGame + "&limit=" + limit + "&offset=" + offset + "&rating=" + rating + "&lang=en"
+        let queryURL =  "https://api.giphy.com/v1/gifs/search?api_key=ZW3MGvr8tjASErfr3PEVyXPF93WiQx2B&q=" + selectedGame + "&limit=" + limit + "&offset=" + offset + "&rating=" + rating + "&lang=en"
 
         $.ajax({
             url: queryURL,
@@ -95,7 +97,7 @@ $(function() {
         }).then(function(response) {
             let result = response.data
             result.forEach(function(element) {
-                let newGifDiv = createGif(element)
+                let newGifDiv = createGif(element, "Add to Favourite", addToFav)
                 $("#populates").append(newGifDiv)
             })
             changeStatus()
@@ -147,8 +149,22 @@ $(function() {
     function addToFav(el) {
         if(localStorage) {
             let favImages = JSON.parse(localStorage.getItem("favImages"))
-            if (!favImages) favImages = {}
-            favImages[el.title] = el
+            if (!favImages) {
+                favImages = {}
+            }
+            favImages[el.id] = el
+            localStorage.setItem('favImages', JSON.stringify(favImages))
+            renderFav()
+        } else {
+            alert('Cannot Fav in Private mode!')
+        }
+    }
+
+        //store image to localStorage
+    function removeFromFav(el) {
+        if(localStorage) {
+            let favImages = JSON.parse(localStorage.getItem("favImages"))
+            delete favImages[el.id]
             localStorage.setItem('favImages', JSON.stringify(favImages))
             renderFav()
         } else {
