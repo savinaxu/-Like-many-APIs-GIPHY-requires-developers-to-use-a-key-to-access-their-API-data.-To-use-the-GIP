@@ -112,9 +112,8 @@ span.left_line {
 
 .favourite {
 	margin-top: 20px;
-	display: flex;
-	justify-content: center;
 	border-bottom: 1px dashed #0fcf8c;
+	overflow: auto;
 }
 
 .btn {
@@ -172,7 +171,9 @@ span.left_line {
     font-size: 18px;
 }
 
-.gameBtn {
+.gameBtn,
+.downBtn,
+.favBtn {
     outline: none;
     height: 30px;
     text-align: center;
@@ -191,7 +192,9 @@ span.left_line {
     
 }
 
-.gameBtn:hover {
+.gameBtn:hover,
+.downBtn:hover,
+.favBtn:hover {
     border: 2px solid #1ecd97;
     color: #1ecd97;
     background: white;
@@ -260,6 +263,7 @@ h3.m_2 {
 .gifRating {
     font-size: 20px;
     font-weight: bold;
+    margin-bottom: 10px;
 }
 
 .moreGif {
@@ -395,7 +399,9 @@ footer p {
         width: 45%; 
     }
 
-    .gameBtn {
+    .gameBtn,
+    .downBtn,
+    .favBtn {
         width: 80px;
         height: 40px;
     }

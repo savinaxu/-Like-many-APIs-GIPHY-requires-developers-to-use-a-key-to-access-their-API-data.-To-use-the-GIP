@@ -6,6 +6,7 @@ $(function() {
     let times = 0;
     let currentData;
 
+    renderFav()
     renderButtons()
 
     //render buttons
@@ -17,6 +18,21 @@ $(function() {
             $(".btn-container").append(button);
         })
         addClickHandler()
+    }
+
+    //render Fav buttons    
+    function renderFav() {
+        $(".favourite").empty()
+        if(localStorage) {
+            let favImages = JSON.parse(localStorage.getItem("favImages"))
+            if (!favImages) return
+            Object.keys(favImages).forEach(function(key) {
+                let newGifDiv = createGif(favImages[key])
+                $(".favourite").append(newGifDiv)
+            });
+        } else {
+            alert('Cannot Fav in Private mode!')
+        }
     }
 
     //push input
@@ -41,10 +57,15 @@ $(function() {
         let gifTitle = $("<p class='gifTitle'>")
         gifTitle.html("Title: " + el.title)
         let download = $("<a href='" + el.images.fixed_height.url + "' download>")
-        let downloadBtn = $("<button class='gameBtn'>")
+        let downloadBtn = $("<button class='downBtn'>")
         downloadBtn.text("Download Now")
+        let favouriteBtn = $("<button class='favBtn'>")
+        favouriteBtn.text("Add to Favourite")
+        favouriteBtn.click(function() {
+            addToFav(el)
+        })
         download.append(downloadBtn)
-        gifDiv.append(gifImg).append(gifRating).append(gifTitle).append(download)
+        gifDiv.append(gifImg).append(gifRating).append(gifTitle).append(download).append(favouriteBtn)
         return gifDiv
     }
 
@@ -122,6 +143,16 @@ $(function() {
         $(".moreGif").append(showMoreGif)
     }
 
-    
-
+    //store image to localStorage
+    function addToFav(el) {
+        if(localStorage) {
+            let favImages = JSON.parse(localStorage.getItem("favImages"))
+            if (!favImages) favImages = {}
+            favImages[el.title] = el
+            localStorage.setItem('favImages', JSON.stringify(favImages))
+            renderFav()
+        } else {
+            alert('Cannot Fav in Private mode!')
+        }
+    }
 })
